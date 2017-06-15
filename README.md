@@ -1,12 +1,15 @@
 # chaos-bot
 A bot to manage the Discord Chaos server.
 
-Currently only on Python 3.5.*.
+Currently only works on Python 3.5.*
 
 To use, first do:
 ```
 pip install discord.py[voice]
-pip install PyYaml
+pip install PyYAML
 ```
 
-Also, add a data.yaml in the source folder with the bot token in it.
+Also, add a info.yaml in the source folder with the bot token in it, as such:
+```
+token: "INSERT_TOKEN_HERE"
+```

@@ -1,5 +1,10 @@
 import discord
 import asyncio
+import io
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+import fileIO
 
 client = discord.Client()
 
@@ -13,6 +18,6 @@ async def on_ready():
 @client.event
 async def on_message(message):
 	if message.content.startswith('!test'):
-		await client.send_message(message.channel, 'aaron stop being an idiot')
+		await client.send_message(message.channel, 'hey this works')
 
-client.run('token')
+client.run(fileIO.getToken())
