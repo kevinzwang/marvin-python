@@ -1,4 +1,4 @@
-# chaos-bot
+# Marvin
 A bot to manage the Discord Chaos server.
 
 Currently only works on Python 3.5.*
