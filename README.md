@@ -9,7 +9,4 @@ pip install discord.py[voice]
 pip install PyYAML
 ```
 
-Also, add a info.yaml in the source folder with the bot token in it, as such:
-```
-token: "INSERT_TOKEN_HERE"
-```
+Also, add a data.yaml in the source folder with the contents given by example-data.yaml.

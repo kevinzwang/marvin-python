@@ -1,0 +1,5 @@
+token: 'INSERT_BOT_TOKEN_HERE'
+
+# The default prefix to signal to the bot that the message is a command.
+# Note that mentioning the bot (@Marvin#1784 or its server nickname) will always work.
+default-prefix: '!'
