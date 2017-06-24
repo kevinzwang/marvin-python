@@ -6,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 from classes.fileIO import FileIO
 
 client = discord.Client()
-data = FileIO()
 
 @client.event
 async def on_ready():
@@ -27,4 +26,4 @@ async def on_message(message):
         await client.send_message(message.channel, 'Bye... ;(')
         await client.logout()
 
-client.run(data.getToken())
+client.run(FileIO().get('token'))
