@@ -3,3 +3,17 @@ token: 'INSERT_BOT_TOKEN_HERE'
 # The default prefix to signal to the bot that the message is a command.
 # Note that mentioning the bot (@Marvin#1784 or its server nickname) will always work.
 default-prefix: '!'
+
+# can do any command w/ bot
+global-admin:
+  - RandNum17#0608
+
+servers:
+    Chaos:
+        prefix: '!'
+        admin:
+            roles:
+                - Shadow Ruler
+                - Mods
+            members: # Name + Discriminator, it's what shows up when you click on a user
+                - RandNum17#0608

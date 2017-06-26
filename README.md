@@ -9,4 +9,4 @@ pip install discord.py[voice]
 pip install PyYAML
 ```
 
-Also, add a data.yaml in the source folder with the contents given by example-data.yaml.
+Also, add a data.yaml in the yaml folder with the contents given by example-data.yaml.
