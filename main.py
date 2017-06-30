@@ -4,23 +4,36 @@ import asyncio
 import os
 import sys
 import time
-import datetime
+from datetime import datetime
 
 from classes.fileIO import FileIO
 
 fio = FileIO()
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('default-prefix', default='!')))
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('prefix')), pm_help=True)
+
+async def _send(channel, message):
+    if isinstance(channel, str):
+        channel = discord.utils.get(server.channels, name=channel)
+    await bot.send_message(channel, message)
+
+async def _not_admin(ctx):
+    await _send(ctx.message.channel, fio.get('messages', 'not-admin').format(ctx.message.author.mention))
+
+async def _incorrect_usage(ctx):
+    await _send(ctx.message.channel, fio.get('messages', 'incorrect-usage').format(ctx.message.author.mention, fio.get('prefix')))
 
 @bot.event
 async def on_ready():
     print('----------')
     print('Success! {} is connected!'.format(bot.user.name))
     print('ID: {}'.format(bot.user.id))
-    print('SERVERS:')
-    for s in bot.servers:
-    	print(' - {}'.format(s.name))
+    print('TIME: {}'.format(time.ctime()))
     print('----------')
 
+    global server 
+    server = next(iter(bot.servers))
+
+    await _send('logs', fio.get('messages', 'online'))
 
 # CUSTOM ACTIONS
 
@@ -39,21 +52,18 @@ async def on_message(message):
                     nickname = nickname[:nickname.rfind(' ')]
 
                 await bot.change_nickname(message.author, nickname)
-                await bot.send_message(message.channel, 'Hi, {}!'.format(message.author.mention))
-                await bot.send_message(message.channel, '*(Type \'{}opt out\' if you would like to opt out of the fun)*'.format(fio.get('default-prefix')))
+                await _send(message.channel, fio.get('messages', 'name-change').format(message.author.mention, fio.get('prefix')))
                 break
 
     # jonnybot replacement
-    if message.content.startswith('~') and message.server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
-        await bot.send_message(message.channel, 'Sorry, but {} is not online right now. Wanna give me a try instead? 😜'.format(message.server.get_member_named('JonnyBot#9936').mention))
+    if message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
+        await bot.send_message(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention, '😜'))
 
     await bot.process_commands(message)
 
 def custom_get_prefix(message):
     if message.server == None:
         return ''
-    elif fio.get('servers', message.server.name, 'prefix') != None:
-        return [fio.get('servers', message.server.name, 'prefix'), bot.user.mention + ' ']
     else:
         prefix = bot.command_prefix
         if callable(prefix):
@@ -82,23 +92,23 @@ async def on_reaction_remove(reaction, user):
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    t = round((datetime.datetime.utcnow() - ctx.message.timestamp).total_seconds() * 1000.0, 3) 
-    await bot.reply('Pong!\nThat took {} milliseconds.'.format(t))
+    t = round((datetime.utcnow() - ctx.message.timestamp).total_seconds() * 1000.0, 3) 
+    await bot.reply(fio.get('messages', 'ping-pong').format(t))
 
 @bot.command(pass_context=True)
 async def opt(ctx, message: str):
     if message == 'in':
         fio.remove('opt-out',  str(ctx.message.author))
-        await bot.reply('opted in successfully!')
+        await bot.reply(fio.get('messages', 'opt-in'))
     elif message == 'out':
         fio.add('opt-out',  str(ctx.message.author))
-        await bot.reply('opted out successfully. If you would like to rejoin the fun, just do \'{}opt in\''.format(fio.get('default-prefix')))
+        await bot.reply(fio.get('messages', 'opt-out').format(fio.get('prefix')))
     else:
-        await bot.reply('incorrect usage. Say either \'{0}opt in\' or \'{0}opt out\''.format(fio.get('default-prefix')))
+        await _incorrect_usage(ctx)
 
 @bot.command()
 async def xkcd(message: str):
-    
+    pass
 
 # TORD
 
@@ -117,39 +127,50 @@ async def wyr():
 # SYSTEM
 
 @bot.command(pass_context=True)
-async def server_prefix(ctx, message: str):
-    if not ctx.message.server:
-        await bot.reply('bruh this is not a server, this is a DM. You don\'t have to use prefixes here.')
-    elif not fio.is_admin(ctx.message.server, ctx.message.author):
-        await bot.reply('you do not have administrative privileges!')
+async def prefix(ctx, *, message:str):
+    message = message.split(' ')
+    if message[0] == 'list':
+        await bot.reply('the current prefix is `{}`'.format(fio.get('prefix')))
+    elif message[0] == 'set' and message[1] != None:
+        if fio.is_admin(ctx.message.author):
+            fio.set('prefix', message[1])
+            bot.command_prefix=commands.when_mentioned_or(fio.get('prefix'))
+            await bot.reply('prefix set successfully to `{}`'.format(message[1]))
+        else:
+            await _incorrect_usage(ctx)
     else:
-        fio.set('servers', ctx.message.server.name, 'prefix', message)
-        await bot.reply('server prefix set successfully to `{}`!'.format(message))
+        await _incorrect_usage(ctx)
 
 @bot.command(pass_context=True)
-async def global_prefix(ctx, message: str):
-    if str(ctx.message.author) in fio.get('global-admin'):
-        fio.set('global-prefix', message)
-        await bot.reply('global prefix set successfully to {}!'.format(message))
-    else:
-        await bot.reply('you do not have administrative privileges!')
-
-@bot.command(pass_context=True)
-async def quit(ctx):
-    if fio.is_admin(ctx.message.server, ctx.message.author):
-        await bot.say('Bye... ;(')
-        fio.dump()
+async def quit(ctx, *, message:str=None):
+    if fio.is_admin(ctx.message.author):
+        await bot.say('Bye... 😞')
+        await _send(fio.get('channels', 'log'), 'Quitting... bye 😞')
+        if message != 'no-dump':
+            fio.dump()
         await bot.logout()
     else:
-        await bot.reply('you do not have administrative privileges!')
+        await _not_admin(ctx)
 
 @bot.command(pass_context=True)
-async def restart(ctx, *message: str):
-    if fio.is_admin(ctx.message.server, ctx.message.author):
+async def restart(ctx, *, message: str=None):
+    if fio.is_admin(ctx.message.author):
         await bot.say('brb')
+        await _send(fio.get('channels', 'log'), 'Restarting, brb.')
         if message != 'no-dump':
             fio.dump()
         bot.logout()
         os.execl(sys.executable, sys.executable, * sys.argv)
+    else:
+        await _not_admin(ctx)
+
+@bot.command(pass_context=True)
+async def dump(ctx):
+    if fio.is_admin(ctx.message.author):
+        await bot.say('dumping data...')
+        fio.dump()
+        await bot.say('done!')
+    else:
+        await _not_admin(ctx)
 
 bot.run(fio.get('token'))

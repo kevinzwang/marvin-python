@@ -1,19 +1,35 @@
-token: 'INSERT_BOT_TOKEN_HERE'
+token: <INSERT_TOKEN_HERE>
 
 # The default prefix to signal to the bot that the message is a command.
 # Note that mentioning the bot (@Marvin#1784 or its server nickname) will always work.
-default-prefix: '!'
+prefix: '!'
+
+opt-out:
+  - Marvin#1784
 
 # can do any command w/ bot
-global-admin:
+admin:
   - RandNum17#0608
 
-servers:
-    Chaos:
-        prefix: '!'
-        admin:
-            roles:
-                - Shadow Ruler
-                - Mods
-            members: # Name + Discriminator, it's what shows up when you click on a user
-                - RandNum17#0608
+admin:
+  roles:
+    - Shadow Ruler
+    - Mods
+  members: # Name + Discriminator, it's what shows up when you click on a user
+    - RandNum17#0608
+
+channels:
+  log: log
+  announcements: announcements
+  spam: nsfw-spam
+
+messages:
+  incorrect-usage: "{}, incorrect usage! Type `{}help [command]` for more instructions."
+  not-admin: "{}, you don\'t have admin privileges!"
+  online: "Hi there! I'm online!"
+  name-change: "Hi {}!\n*(Type \'{}opt out\' if you would like to opt out of the fun)*"
+  jonnybot: "Sorry, but {} is not online right now. Wanna give me a try instead? {}"
+  ping-pong: "Pong!\nThat took {} milliseconds."
+  opt-in: "opted in successfully!"
+  opt-out: "opted out successfully. If you would like to rejoin the fun, just do \'{}opt in\'"
+  not-a-server: "bruh this is not a server, this is a DM. You don\'t have to use prefixes here."

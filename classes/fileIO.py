@@ -43,11 +43,14 @@ class FileIO:
         if self.contains(key, value):
             self.data[key].remove(value)
 
-    def is_admin(self, server, member):
-        return (str(member) in (self.get('global-admin') + self.get('servers', server.name, 'admin', 'members')) or any(str(role) in self.get('servers', server.name, 'admin', 'roles') for role in member.roles))
+    """
+    @param server - discord.Server
+    @param member - discord.User
 
-    def get_server_info(self, server, key, default=None):
-        return self.get('servers', server.name, key, default=default)
+    @return - boolean, whether member is an admin of the server or not
+    """
+    def is_admin(self, member):
+        return (str(member) in self.get('admin', 'members') or any(str(role) in self.get('admin', 'roles') for role in member.roles))
 
     def get_tord(self, mode):
         return random.choice(self.tord.get(mode))

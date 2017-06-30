@@ -1,5 +1,7 @@
-import requests
+import asyncio
+import aiohttp
 
 class WebIO:
 	def __init__(self):
-		pass
+		self.http = urllib3.Pool
+		
