@@ -19,17 +19,17 @@ admin:
     - RandNum17#0608
 
 channels:
-  log: log
+  log: logs
   announcements: announcements
   spam: nsfw-spam
 
 messages:
   incorrect-usage: "{}, incorrect usage! Type `{}help [command]` for more instructions."
-  not-admin: "{}, you don\'t have admin privileges!"
+  not-admin: "{}, you don't have admin privileges!"
   online: "Hi there! I'm online!"
-  name-change: "Hi {}!\n*(Type \'{}opt out\' if you would like to opt out of the fun)*"
-  jonnybot: "Sorry, but {} is not online right now. Wanna give me a try instead? {}"
+  name-change: "Hi {}!\n*(Type '{}opt out' if you would like to opt out of the fun)*"
+  jonnybot: "Sorry, but {} is not online right now. Wanna give me a try instead? :stuck_out_tongue_winking_eye:"
   ping-pong: "Pong!\nThat took {} milliseconds."
   opt-in: "opted in successfully!"
-  opt-out: "opted out successfully. If you would like to rejoin the fun, just do \'{}opt in\'"
-  not-a-server: "bruh this is not a server, this is a DM. You don\'t have to use prefixes here."
+  opt-out: "opted out successfully. If you would like to rejoin the fun, just do '{}opt in'"
+  not-a-server: "bruh this is not a server, this is a DM. You don't have to use prefixes here."

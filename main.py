@@ -39,10 +39,14 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    
+    if message.content.startswith(fio.get('prefix')) and message.server == None:
+        await _send(message.channel, fio.get('messages', 'not-a-server'))
+
     lower = message.content.lower()
 
     # change nickname when people say "I'm ____"
-    if not fio.contains('opt-out', str(message.author)):
+    if  message.server != None and not fio.contains('opt-out', str(message.author)):
         for im in ['im ', 'i\'m ', 'i am ']:
             if im in lower:
                 index = lower.find(im) + len(im)
@@ -56,8 +60,8 @@ async def on_message(message):
                 break
 
     # jonnybot replacement
-    if message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
-        await bot.send_message(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention, '😜'))
+    if message.server != None and message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
+        await bot.send_message(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention))
 
     await bot.process_commands(message)
 
