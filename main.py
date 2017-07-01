@@ -10,6 +10,7 @@ from classes.fileIO import FileIO
 
 fio = FileIO()
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('prefix')), pm_help=True)
+loop = asyncio.get_event_loop()
 
 async def _send(channel, message):
     if isinstance(channel, str):
@@ -39,14 +40,10 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    
-    if message.content.startswith(fio.get('prefix')) and message.server == None:
-        await _send(message.channel, fio.get('messages', 'not-a-server'))
-
     lower = message.content.lower()
 
     # change nickname when people say "I'm ____"
-    if  message.server != None and not fio.contains('opt-out', str(message.author)):
+    if not fio.contains('opt-out', str(message.author)):
         for im in ['im ', 'i\'m ', 'i am ']:
             if im in lower:
                 index = lower.find(im) + len(im)
@@ -55,13 +52,16 @@ async def on_message(message):
                     nickname = nickname[:33]
                     nickname = nickname[:nickname.rfind(' ')]
 
+                oldName = message.author.nick
                 await bot.change_nickname(message.author, nickname)
                 await _send(message.channel, fio.get('messages', 'name-change').format(message.author.mention, fio.get('prefix')))
+                await asyncio.sleep(30)
+                await bot.change_nickname(message.author, oldName)
                 break
 
     # jonnybot replacement
-    if message.server != None and message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
-        await bot.send_message(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention))
+    if message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
+        await _send(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention, '😜'))
 
     await bot.process_commands(message)
 
@@ -116,17 +116,25 @@ async def xkcd(message: str):
 
 # TORD
 
-@bot.command()
-async def truth():
-    await bot.say(fio.get_tord('truth'))
+async def tord(mode, ctx, message):
+    if message == None:
+        await _send(ctx.message.channel, fio.get_tord(mode))
+    elif message == 'list':
+        await _send(ctx.message.author, fio.list_tord(mode))
+    else:
+        _incorrect_usage(ctx)
 
-@bot.command()
-async def dare():
-    await bot.say(fio.get_tord('dare'))
+@bot.command(pass_context=True)
+async def truth(ctx, *, message:str=None):
+    await tord('truth', ctx, message)
 
-@bot.command()
-async def wyr():
-    await bot.say(fio.get_tord('wyr'))
+@bot.command(pass_context=True)
+async def dare(ctx, *, message:str=None):
+    await tord('dare', ctx, message)
+
+@bot.command(pass_context=True)
+async def wyr(ctx, *, message:str=None):
+    await tord('wyr', ctx, message)
 
 # SYSTEM
 

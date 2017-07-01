@@ -55,6 +55,14 @@ class FileIO:
     def get_tord(self, mode):
         return random.choice(self.tord.get(mode))
 
+    def list_tord(self, mode):
+        l = self.tord.get(mode)
+        sl = '```\n'
+        for i in l:
+            sl += i + '\n'
+        sl += '```'
+        return sl
+
     def dump(self):
         file = open(os.path.join(os.path.dirname(__file__), os.pardir, 'yaml', 'data.yaml'), 'w')
         yaml.safe_dump(self.data, file, default_flow_style=False)
