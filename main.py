@@ -11,6 +11,7 @@ from classes.fileIO import FileIO
 fio = FileIO()
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('prefix')), pm_help=True)
 loop = asyncio.get_event_loop()
+availables = {}
 
 async def _send(channel, message):
     if isinstance(channel, str):
@@ -109,6 +110,44 @@ async def opt(ctx, message: str):
         await bot.reply(fio.get('messages', 'opt-out').format(fio.get('prefix')))
     else:
         await _incorrect_usage(ctx)
+
+@bot.command(pass_context=True) 
+async def available(ctx, message: str):
+    if message == 'list':
+        if len(availables) > 0:
+            await bot.reply('people currently available:')
+            for key, value in availables.items():
+                await _send(ctx.message.channel, ' - ' + key.nick)
+        else:
+            await bot.reply('nobody currently available. :cry:')
+    elif message == 'remove':
+        del availables[ctx.message.author]
+        await bot.reply('success!')
+    elif message.isdigit():
+        if ctx.message.author in availables:
+            availables[ctx.message.author] += 1;
+        else:
+            availables[ctx.message.author] = 1;
+
+        mentions = ''
+        if len(availables) >= 4:
+            for key, value in availables.items():
+                mentions += key.mention + ' '
+            await _send('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
+        else:
+            await bot.reply('availability recorded successfully!')
+
+        await asyncio.sleep(int(message)*60)
+        if ctx.message.author in availables.keys():
+            availables[ctx.message.author] -= 1;
+            if availables[ctx.message.author] == 0:
+                del availables[ctx.message.author]
+    else:
+        await _incorrect_usage(ctx)
+
+@bot.command(pass_context=True) 
+async def avail(ctx, message: str):
+    await ctx.invoke(available, message)
 
 @bot.command()
 async def xkcd(message: str):
