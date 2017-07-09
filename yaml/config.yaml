@@ -1,0 +1,19 @@
+admin:
+  members:
+  - RandNum17#0608
+  roles:
+  - Shadow Ruler
+  - Mods
+blacklist: null
+channels:
+  announcements: announcements
+  log: logs
+  spam: nsfw-spam
+opt-out:
+- Marvin#1784
+- Aeiquia#1035
+- calymsis#7585
+- Martian Marvin#7095
+prefix: '!'
+requests-per-minute: 5
+token: 

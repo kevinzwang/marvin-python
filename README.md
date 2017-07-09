@@ -8,5 +8,3 @@ To use, first do:
 pip install discord.py[voice]
 pip install PyYAML
 ```
-
-Also, add a data.yaml in the yaml folder with the contents given by example-data.yaml.

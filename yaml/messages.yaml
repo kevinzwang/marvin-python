@@ -1,0 +1,15 @@
+incorrect-usage: '{}, incorrect usage! Type `{}help [command]` for more instructions.'
+jonnybot: 'Sorry, but {} is not online right now. Wanna give me a try instead? :stuck_out_tongue_winking_eye:'
+name-change: 'Hi {}!
+
+  *(Type ''{}opt out'' if you would like to opt out of the fun)*'
+not-a-server: bruh this is not a server, this is a DM. You don't have to use prefixes
+  here.
+not-admin: '{}, you don''t have admin privileges!'
+online: Hi there! I'm online!
+opt-in: opted in successfully!
+opt-out: opted out successfully. If you would like to rejoin the fun, just do '{}opt
+  in'
+ping-pong: 'Pong!
+
+  That took {} milliseconds.'
