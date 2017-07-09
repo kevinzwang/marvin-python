@@ -96,6 +96,11 @@ async def on_reaction_remove(reaction, user):
 # COMMANDS
 
 @bot.command(pass_context=True)
+async def join(ctx, message: str):
+    if ctx.message.author.name == 'RandNum17':
+        bot.join_voice_channel(discord.utils.get(server.channels, name=message, type=discord.ChannelType.voice)
+
+@bot.command(pass_context=True)
 async def skip(ctx):
     if ctx.message.author.name == 'RandNum17':
         await bot.say('!skip')
