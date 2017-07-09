@@ -96,6 +96,11 @@ async def on_reaction_remove(reaction, user):
 # COMMANDS
 
 @bot.command(pass_context=True)
+async def skip(ctx):
+    if ctx.message.author.name == 'RandNum17':
+        await bot.say('!skip')
+
+@bot.command(pass_context=True)
 async def ping(ctx):
     t = round((datetime.utcnow() - ctx.message.timestamp).total_seconds() * 1000.0, 3) 
     await bot.reply(fio.get('messages', 'ping-pong').format(t))
