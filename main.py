@@ -1,14 +1,17 @@
-import discord
-from discord.ext import commands
 import asyncio
 import os
 import sys
 import time
 from datetime import datetime
 
+import discord
+from discord.ext import commands
+
 from classes.fileIO import FileIO
+from classes.webIO import WebIO
 
 fio = FileIO()
+wio = WebIO()
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('config', 'prefix')), pm_help=True)
 loop = asyncio.get_event_loop()
 availables = {}
@@ -32,7 +35,7 @@ async def on_ready():
     print('TIME: {}'.format(time.ctime()))
     print('----------')
 
-    global server 
+    global server
     server = next(iter(bot.servers))
 
     await _send('logs', fio.get('messages', 'online'))
@@ -43,7 +46,7 @@ async def on_ready():
 async def on_message(message):
     lower = message.content.lower()
 
-    # change nickname when people say "I'm ____"
+    # change nickname when people say "I'm ___"
     if str(message.author) not in fio.get('config', 'opt-out'):
         for im in ['im ', 'i\'m ', 'i am ']:
             if im in lower:
@@ -95,6 +98,11 @@ async def on_reaction_remove(reaction, user):
 
 # COMMANDS
 
+@bot.command()
+async def lmgtfy(*, message: str):
+    url = wio.lmgtfy(message)
+    await bot.say(url)
+
 @bot.command(pass_context=True)
 async def ping(ctx):
     t = round((datetime.utcnow() - ctx.message.timestamp).total_seconds() * 1000.0, 3) 
@@ -116,10 +124,10 @@ async def available(ctx, message: str):
     if message == 'list':
         if len(availables) > 0:
             await bot.reply('people currently available:')
-            for key, value in availables.items():
-                nick = key.nick
+            for member in availables:
+                nick = member.nick
                 if nick == None:
-                    nick = key.name
+                    nick = member.name
                 await _send(ctx.message.channel, ' - ' + nick)
         else:
             await bot.reply('nobody currently available. :cry:')
@@ -128,21 +136,21 @@ async def available(ctx, message: str):
         await bot.reply('success!')
     elif message.isdigit():
         if ctx.message.author in availables:
-            availables[ctx.message.author] += 1;
+            availables[ctx.message.author] += 1
         else:
-            availables[ctx.message.author] = 1;
+            availables[ctx.message.author] = 1
 
         mentions = ''
         if len(availables) >= 4:
-            for key, value in availables.items():
-                mentions += key.mention + ' '
+            for member in availables:
+                mentions += member.mention + ' '
             await _send('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
         else:
             await bot.reply('availability recorded successfully!')
 
         await asyncio.sleep(int(message)*60)
         if ctx.message.author in availables.keys():
-            availables[ctx.message.author] -= 1;
+            availables[ctx.message.author] -= 1
             if availables[ctx.message.author] == 0:
                 del availables[ctx.message.author]
     else:

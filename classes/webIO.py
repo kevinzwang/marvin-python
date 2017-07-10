@@ -1,7 +1,8 @@
-import asyncio
-import aiohttp
+import requests
 
 class WebIO:
-	def __init__(self):
-		self.http = urllib3.Pool
-		
+    def lmgtfy(self, message):
+        params = {'q': message}
+        resp = requests.get('https://lmgtfy.com/', params=params)
+        return str(resp.url)
+        
