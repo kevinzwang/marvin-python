@@ -45,11 +45,11 @@ async def on_message(message):
     if str(message.author) not in fileIO.get('config', 'opt-out') and not message.author.bot:
         for im in ['im ', 'i\'m ', 'i am ']:
             index = lower.find(im)
-            if index != -1 and (index == 0 or lower[index] == ' '):
+            if index != -1 and (index == 0 or lower[index - 1] == ' '):
                 punctuation = len(lower)
-                for p in '.,;!?':
-                    i = lower.find(p)
-                    if i != 0 and i > index and i < punctuation:
+                for p in ['.', ',', ';', '!', '?']:
+                    i = message.content.find(p, index)
+                    if i != -1  and i < punctuation:
                         punctuation = i
 
                 nickname = message.content[index + len(im):punctuation]
