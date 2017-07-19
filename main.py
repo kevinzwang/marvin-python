@@ -7,25 +7,20 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from classes.fileIO import FileIO
-from classes.webIO import WebIO
+from classes import fileIO
+from classes import webIO
+from classes import marvin
 
-fio = FileIO()
-wio = WebIO()
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(fio.get('config', 'prefix')), pm_help=True)
+fileIO.__init__()
+bot = marvin.Bot()
 loop = asyncio.get_event_loop()
 availables = {}
 
-async def _send(channel, message):
-    if isinstance(channel, str):
-        channel = discord.utils.get(server.channels, name=channel)
-    await bot.send_message(channel, message)
-
 async def _not_admin(ctx):
-    await _send(ctx.message.channel, fio.get('messages', 'not-admin').format(ctx.message.author.mention))
+    await bot.send_message(ctx.message.channel, fileIO.get('messages', 'not-admin').format(ctx.message.author.mention))
 
 async def _incorrect_usage(ctx):
-    await _send(ctx.message.channel, fio.get('messages', 'incorrect-usage').format(ctx.message.author.mention, fio.get('config', 'prefix')))
+    await bot.send_message(ctx.message.channel, fileIO.get('messages', 'incorrect-usage').format(ctx.message.author.mention, fileIO.get('config', 'prefix')))
 
 @bot.event
 async def on_ready():
@@ -38,7 +33,7 @@ async def on_ready():
     global server
     server = next(iter(bot.servers))
 
-    await _send('logs', fio.get('messages', 'online'))
+    await bot.send_message('logs', fileIO.get('messages', 'online'))
 
 # CUSTOM ACTIONS
 
@@ -47,17 +42,24 @@ async def on_message(message):
     lower = message.content.lower()
 
     # change nickname when people say "I'm ___"
-    if str(message.author) not in fio.get('config', 'opt-out'):
+    if str(message.author) not in fileIO.get('config', 'opt-out') and not message.author.bot:
         for im in ['im ', 'i\'m ', 'i am ']:
-            if im in lower:
-                index = lower.find(im) + len(im)
-                nickname = message.content[index:]
+            index = lower.find(im)
+            if index != -1 and (index == 0 or lower[index] == ' '):
+                punctuation = len(lower)
+                for p in '.,;!?':
+                    i = lower.find(p)
+                    if i != 0 and i > index and i < punctuation:
+                        punctuation = i
+
+                nickname = message.content[index + len(im):punctuation]
+
                 if len(nickname) > 32:
                     nickname = nickname[:33]
                     nickname = nickname[:nickname.rfind(' ')]
 
                 oldName = message.author.nick
-                await _send(message.channel, fio.get('messages', 'name-change').format(message.author.mention, fio.get('config', 'prefix')))
+                await bot.send_message(message.channel, fileIO.get('messages', 'name-change').format(nickname, fileIO.get('config', 'prefix')))
                 await bot.change_nickname(message.author, nickname)
                 await asyncio.sleep(30)
                 await bot.change_nickname(message.author, oldName)
@@ -65,24 +67,9 @@ async def on_message(message):
 
     # jonnybot replacement
     if message.content.startswith('~') and server.get_member_named('JonnyBot#9936').status == discord.Status.offline:
-        await _send(message.channel, fio.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention, '😜'))
+        await bot.send_message(message.channel, fileIO.get('messages', 'jonnybot').format(server.get_member_named('JonnyBot#9936').mention, '😜'))
 
     await bot.process_commands(message)
-
-def custom_get_prefix(message):
-    if message.server == None:
-        return ''
-    else:
-        prefix = bot.command_prefix
-        if callable(prefix):
-            ret = prefix(bot, message)
-            if asyncio.iscoroutine(ret):
-                ret = yield from ret
-            return ret
-        else:
-            return prefix
-
-bot._get_prefix = custom_get_prefix
 
 @bot.event
 async def on_reaction_add(reaction, user):
@@ -96,26 +83,26 @@ async def on_reaction_remove(reaction, user):
     if reaction.emoji == '📌':
         await bot.unpin_message(reaction.message)
 
-# COMMANDS
+# COMMANDS 
 
 @bot.command()
 async def lmgtfy(*, message: str):
-    url = wio.lmgtfy(message)
+    url = await webIO.lmgtfy(message)
     await bot.say(url)
 
 @bot.command(pass_context=True)
 async def ping(ctx):
     t = round((datetime.utcnow() - ctx.message.timestamp).total_seconds() * 1000.0, 3) 
-    await bot.reply(fio.get('messages', 'ping-pong').format(t))
+    await bot.reply(fileIO.get('messages', 'ping-pong').format(t))
 
 @bot.command(pass_context=True)
 async def opt(ctx, message: str):
     if message == 'in':
-        fio.remove('config', 'opt-out',  str(ctx.message.author))
-        await bot.reply(fio.get('messages', 'opt-in'))
+        fileIO.remove('config', 'opt-out',  str(ctx.message.author))
+        await bot.reply(fileIO.get('messages', 'opt-in'))
     elif message == 'out':
-        fio.add('config', 'opt-out',  str(ctx.message.author))
-        await bot.reply(fio.get('messages', 'opt-out').format(fio.get('config', 'prefix')))
+        fileIO.add('config', 'opt-out',  str(ctx.message.author))
+        await bot.reply(fileIO.get('messages', 'opt-out').format(fileIO.get('config', 'prefix')))
     else:
         await _incorrect_usage(ctx)
 
@@ -128,7 +115,7 @@ async def available(ctx, message: str):
                 nick = member.nick
                 if nick == None:
                     nick = member.name
-                await _send(ctx.message.channel, ' - ' + nick)
+                await bot.send_message(ctx.message.channel, ' - ' + nick)
         else:
             await bot.reply('nobody currently available. :cry:')
     elif message == 'remove':
@@ -144,7 +131,7 @@ async def available(ctx, message: str):
         if len(availables) >= 4:
             for member in availables:
                 mentions += member.mention + ' '
-            await _send('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
+            await bot.send_message('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
         else:
             await bot.reply('availability recorded successfully!')
 
@@ -168,9 +155,9 @@ async def xkcd(message: str):
 
 async def tord(mode, ctx, message):
     if message == None:
-        await _send(ctx.message.channel, fio.get_tord(mode))
+        await bot.send_message(ctx.message.channel, fileIO.get_tord(mode))
     elif message == 'list':
-        await _send(ctx.message.author, fio.list_tord(mode))
+        await bot.send_message(ctx.message.author, fileIO.list_tord(mode))
     else:
         _incorrect_usage(ctx)
 
@@ -192,11 +179,11 @@ async def wyr(ctx, *, message:str=None):
 async def prefix(ctx, *, message:str):
     message = message.split(' ')
     if message[0] == 'list':
-        await bot.reply('the current prefix is `{}`'.format(fio.get('config', 'prefix')))
+        await bot.reply('the current prefix is `{}`'.format(fileIO.get('config', 'prefix')))
     elif message[0] == 'set' and message[1] != None:
-        if fio.is_admin(ctx.message.author):
-            fio.set('config', 'prefix', message[1])
-            bot.command_prefix=commands.when_mentioned_or(fio.get('config', 'prefix'))
+        if fileIO.is_admin(ctx.message.author):
+            fileIO.set('config', 'prefix', message[1])
+            bot.command_prefix=commands.when_mentioned_or(fileIO.get('config', 'prefix'))
             await bot.reply('prefix set successfully to `{}`'.format(message[1]))
         else:
             await _incorrect_usage(ctx)
@@ -205,22 +192,22 @@ async def prefix(ctx, *, message:str):
 
 @bot.command(pass_context=True)
 async def quit(ctx, *, message:str=None):
-    if fio.is_admin(ctx.message.author):
+    if fileIO.is_admin(ctx.message.author):
         await bot.say('Bye... 😞')
-        await _send(fio.get('config', 'channels', 'log'), 'Quitting... bye 😞')
+        await bot.send_message(fileIO.get('config', 'channels', 'log'), 'Quitting... bye 😞')
         if message != 'no-dump':
-            fio.dump()
+            fileIO.dump()
         await bot.logout()
     else:
         await _not_admin(ctx)
 
 @bot.command(pass_context=True)
 async def restart(ctx, *, message: str=None):
-    if fio.is_admin(ctx.message.author):
+    if fileIO.is_admin(ctx.message.author):
         await bot.say('brb')
-        await _send(fio.get('config', 'channels', 'log'), 'Restarting, brb.')
+        await bot.send_message(fileIO.get('config', 'channels', 'log'), 'Restarting, brb.')
         if message != 'no-dump':
-            fio.dump()
+            fileIO.dump()
         bot.logout()
         os.execl(sys.executable, sys.executable, * sys.argv)
     else:
@@ -228,14 +215,14 @@ async def restart(ctx, *, message: str=None):
 
 @bot.command(pass_context=True)
 async def dump(ctx):
-    if fio.is_admin(ctx.message.author):
+    if fileIO.is_admin(ctx.message.author):
         await bot.say('dumping data...')
-        fio.dump()
+        fileIO.dump()
         await bot.say('done!')
     else:
         await _not_admin(ctx)
 
-if fio.get('config', 'token') == None:
+if fileIO.get('config', 'token') == None:
     print('Before we proceed, you must supply the bot token in \'yaml/config.yaml\'. Quitting...')
 else:
-    bot.run(fio.get('config', 'token'))
+    bot.run(fileIO.get('config', 'token'))
