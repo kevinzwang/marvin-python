@@ -4,13 +4,20 @@ A bot to manage the Discord Chaos server.
 ## Requirements
 Currently only works on Python 3.5.*
 
-To use, first do:
+To use, first type in your terminal:
 ```
-pip install discord.py[voice]
-pip install PyYAML
-pip install html2text
+pip3 install discord.py[voice]
+pip3 install PyYAML
+pip3 install html2text
 ```
 and also follow the instructions [here](https://github.com/Just-Some-Bots/MusicBot/wiki) to configure music.
+
+# Usage
+First, put your bot token on the token line in `yaml/config.yaml`.
+
+Next, type in your terminal: `python3 main.py`.
+
+Finally, celebrate!
 
 ## Versions
 
