@@ -16,4 +16,4 @@ class Bot(commands.Bot):
     async def send_message(self, channel, message):
         if isinstance(channel, str):
             channel = discord.utils.get(next(iter(self.servers)).channels, name=channel)
-        await super().send_message(channel, message)
+        return await super().send_message(channel, message)
