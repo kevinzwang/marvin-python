@@ -17,7 +17,7 @@ First, put your bot token on the token line in `yaml/config.yaml`.
 
 Next, type in your terminal: `python3 main.py`.
 
-Finally, celebrate!
+Finally, celebrate! 🎉
 
 ## Versions
 
