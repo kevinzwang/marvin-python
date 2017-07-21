@@ -13,7 +13,9 @@ pip3 install html2text
 and also follow the instructions [here](https://github.com/Just-Some-Bots/MusicBot/wiki) to configure music.
 
 # Usage
-First, put your bot token on the token line in `yaml/config.yaml`.
+First, create a bot account and add it to your server. Instructions on how to do it can be found [here](https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token).
+
+After that, put your bot token on the token line in `yaml/config.yaml`.
 
 Next, type in your terminal: `python3 main.py`.
 
