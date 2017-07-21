@@ -8,10 +8,14 @@ To use, first do:
 ```
 pip install discord.py[voice]
 pip install PyYAML
+pip install html2text
 ```
 and also follow the instructions [here](https://github.com/Just-Some-Bots/MusicBot/wiki) to configure music.
 
 ## Versions
+
+### 1.0.1
+* xkcd! gets the relevant xkcd for the query provided
 
 ### 1.0.0
 * First official version! Features:
