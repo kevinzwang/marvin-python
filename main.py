@@ -252,6 +252,44 @@ async def prefix(ctx, *, message:str):
         await _incorrect_usage(ctx)
 
 @bot.command(pass_context=True)
+async def disable(ctx, *, message:str):
+    if message == '-list' or message == '-l':
+        if len(bot.disabled) != 0:
+            reply = 'Commands that are currently disabled: '
+            for cmd in bot.disabled:
+                reply += cmd + ', '
+            reply = reply[:-2]
+            await bot.say(reply)
+        else:
+            await bot.reply('no commands currently disabled.')
+    else:
+        if fileIO.is_admin(ctx.message.author):
+            if message not in ['disable', 'enable']:
+                if message in bot.commands:
+                    if message not in bot.disabled:
+                        bot.disabled.append(message)
+                        await bot.reply('command ' + message + ' successfully disabled!')
+                    else:
+                        await bot.reply('command ' + message + ' is already disabled.')
+                else:
+                    await bot.reply(message + ' is not a command!')
+            else:
+                await bot.reply('good try, but I hate you for even thinking about doing that.')
+        else:
+            await _not_admin(ctx)
+
+@bot.command(pass_context=True)
+async def enable(ctx, message:str):
+    if fileIO.is_admin(ctx.message.author):
+        if message in bot.disabled:
+            bot.disabled.remove(message)
+            await bot.reply('command ' + message + ' successfully enabled!')
+        else:
+            await bot.reply('command ' + message + ' was not disabled.')
+    else:
+        await _not_admin(ctx)
+
+@bot.command(pass_context=True)
 async def quit(ctx, *, message:str=None):
     if fileIO.is_admin(ctx.message.author):
         await bot.say('Bye... 😞')

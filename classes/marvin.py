@@ -5,6 +5,7 @@ from classes import fileIO
 
 class Bot(commands.Bot):
     def __init__(self):
+        self.disabled = []
         super().__init__(command_prefix=commands.when_mentioned_or(fileIO.get('config', 'prefix')), pm_help=True)
 
     async def _get_prefix(self, message):
@@ -17,3 +18,13 @@ class Bot(commands.Bot):
         if isinstance(channel, str):
             channel = discord.utils.get(next(iter(self.servers)).channels, name=channel)
         return await super().send_message(channel, message)
+
+    async def process_commands(self, message):
+        for cmdName in self.disabled:
+            prefixes = await self._get_prefix(message)
+            for prefix in prefixes:
+                if message.content.startswith(prefix + cmdName):
+                    await self.send_message(message.channel, message.author.mention + ', that command is disabled!')
+                    return
+        
+        await super().process_commands(message)
