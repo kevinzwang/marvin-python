@@ -34,8 +34,6 @@ async def on_ready():
     global server
     server = next(iter(bot.servers))
 
-    await bot.send_message('logs', fileIO.get('messages', 'online'))
-
 # CUSTOM ACTIONS
 
 @bot.event
@@ -150,66 +148,69 @@ async def avail(ctx, message: str):
 
 @bot.command(pass_context=True)
 async def xkcd(ctx, *, message:str=None):
-    if message == 'latest' or message == None:
-        content = await webIO.xkcdContent('https://xkcd.com/')
-
-        top = content[0].upper() + ' (' + content[1] + ')'
-        bottom = '*' + content[3] + '*'
-
-        await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-        await bot.say(bottom)
-
-    elif message == 'random':
-        content = await webIO.xkcdContent('https://c.xkcd.com/random/comic/')
-
-        top = content[0].upper() + ' (' + content[1] + ')'
-        bottom = '*' + content[3] + '*'
-
-        await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-        await bot.say(bottom)
-
-    else:
-        links = await webIO.xkcdLinks(message)
-        currentComic = 0
-
-        correct = False
-        
-        response = None
-
-        while not correct:
-            content = await webIO.xkcdContent(links[currentComic])
+    try:
+        if message == 'latest' or message == None:
+            content = await webIO.xkcdContent('https://xkcd.com/')
 
             top = content[0].upper() + ' (' + content[1] + ')'
             bottom = '*' + content[3] + '*'
 
-            r1 = await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-            r2 = await bot.say(bottom)
+            await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
+            await bot.say(bottom)
+
+        elif message == 'random':
+            content = await webIO.xkcdContent('https://c.xkcd.com/random/comic/')
+
+            top = content[0].upper() + ' (' + content[1] + ')'
+            bottom = '*' + content[3] + '*'
+
+            await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
+            await bot.say(bottom)
+
+        else:
+            links = await webIO.xkcdLinks(message)
+            currentComic = 0
+
+            correct = False
             
-            await bot.add_reaction(r2, '✅')
-            await bot.add_reaction(r2, '⛔')
+            response = None
 
-            reaction = await bot.wait_for_reaction(emoji=['✅', '⛔'], message=r2, timeout=30, user=ctx.message.author)
+            while not correct:
+                content = await webIO.xkcdContent(links[currentComic])
 
-            if reaction == None:
-                await bot.remove_reaction(r2, '✅', bot.user)
-                await bot.remove_reaction(r2, '⛔', bot.user)
-                correct = True
-            elif str(reaction.reaction.emoji) == '✅':
-                await bot.remove_reaction(r2, '✅', bot.user)
-                await bot.remove_reaction(r2, '⛔', bot.user)
-                await bot.remove_reaction(r2, '✅', ctx.message.author)
-                correct = True
-            elif str(reaction.reaction.emoji) == '⛔':
-                if currentComic < 4:
-                    await bot.delete_message(r1)
-                    await bot.delete_message(r2)
-                else:
-                    await bot.delete_message(r1)
-                    await bot.delete_message(r2)
-                    await bot.say('Welp, that\'s all. Better luck next time.')
+                top = content[0].upper() + ' (' + content[1] + ')'
+                bottom = '*' + content[3] + '*'
+
+                r1 = await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
+                r2 = await bot.say(bottom)
+                
+                await bot.add_reaction(r2, '✅')
+                await bot.add_reaction(r2, '⛔')
+
+                reaction = await bot.wait_for_reaction(emoji=['✅', '⛔'], message=r2, timeout=30, user=ctx.message.author)
+
+                if reaction == None:
+                    await bot.remove_reaction(r2, '✅', bot.user)
+                    await bot.remove_reaction(r2, '⛔', bot.user)
                     correct = True
+                elif str(reaction.reaction.emoji) == '✅':
+                    await bot.remove_reaction(r2, '✅', bot.user)
+                    await bot.remove_reaction(r2, '⛔', bot.user)
+                    await bot.remove_reaction(r2, '✅', ctx.message.author)
+                    correct = True
+                elif str(reaction.reaction.emoji) == '⛔':
+                    if currentComic < 4:
+                        await bot.delete_message(r1)
+                        await bot.delete_message(r2)
+                    else:
+                        await bot.delete_message(r1)
+                        await bot.delete_message(r2)
+                        await bot.say('Welp, that\'s all. Better luck next time.')
+                        correct = True
 
-                currentComic += 1
+                    currentComic += 1
+    except Exception:
+        await bot.say('Whoops, something went wrong while trying to get your xkcd. Try again later.')
 
 # TORD
 
@@ -254,7 +255,6 @@ async def prefix(ctx, *, message:str):
 async def quit(ctx, *, message:str=None):
     if fileIO.is_admin(ctx.message.author):
         await bot.say('Bye... 😞')
-        await bot.send_message(fileIO.get('config', 'channels', 'log'), 'Quitting... bye 😞')
         if message != 'no-dump':
             fileIO.dump()
         await bot.logout()
@@ -265,7 +265,6 @@ async def quit(ctx, *, message:str=None):
 async def restart(ctx, *, message: str=None):
     if fileIO.is_admin(ctx.message.author):
         await bot.say('brb')
-        await bot.send_message(fileIO.get('config', 'channels', 'log'), 'Restarting, brb.')
         if message != 'no-dump':
             fileIO.dump()
         bot.logout()

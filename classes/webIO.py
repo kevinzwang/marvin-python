@@ -29,17 +29,6 @@ async def xkcdLinks(message):
 
     return relevants
 
-async def xkcdImage(url):
-    response = await session.get(url=url)
-    html = await response.text()
-    start = html.find('imgs.xkcd.com')
-    end = html.find('"', start)
-    
-    imgResp = await session.get(url='http://' + html[start:end])
-    my_bytes = await imgResp.read()
-    my_stream = BytesIO(my_bytes)
-    return my_stream
-
 async def xkcdContent(url):
     response = await session.get(url=url)
     html = await response.text()
