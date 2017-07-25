@@ -16,6 +16,7 @@ webIO.__init__()
 bot = marvin.Bot()
 loop = asyncio.get_event_loop()
 availables = {}
+nicknames = {}
 
 async def _not_admin(ctx):
     await bot.send_message(ctx.message.channel, fileIO.get('messages', 'not-admin').format(ctx.message.author.mention))
@@ -57,11 +58,21 @@ async def on_message(message):
                     nickname = nickname[:33]
                     nickname = nickname[:nickname.rfind(' ')]
 
-                oldName = message.author.nick
                 await bot.send_message(message.channel, fileIO.get('messages', 'name-change').format(nickname, fileIO.get('config', 'prefix')))
+                
+                global nicknames
+                if str(message.author) not in nicknames:
+                    nicknames[str(message.author)] = [message.author.nick, 1]
+                else:
+                    nicknames[str(message.author)][1] += 1
+
                 await bot.change_nickname(message.author, nickname)
                 await asyncio.sleep(30)
-                await bot.change_nickname(message.author, oldName)
+
+                nicknames[str(message.author)][1] -= 1
+                if nicknames[str(message.author)][1] == 0:
+                    await bot.change_nickname(message.author, nicknames[str(message.author)][0])
+                    del nicknames[str(message.author)]
                 break
 
     # jonnybot replacement
