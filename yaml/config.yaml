@@ -9,11 +9,16 @@ channels:
   announcements: announcements
   log: logs
   spam: nsfw-spam
+colors:
+  xkcd: 9873608
 opt-out:
 - Marvin#1784
 - Aeiquia#1035
 - calymsis#7585
 - Martian Marvin#7095
+- Here'sJohnny#7374
+- Gabbz_The_Antihero#7442
+- RandNum17#0608
+- HeresJohnny#7374
 prefix: '!'
-requests-per-minute: 5
 token: 

@@ -14,10 +14,10 @@ class Bot(commands.Bot):
         else:
             return list(fileIO.get('config', 'prefix')) + [message.server.me.mention, 'marv ', 'marv, ', 'Marv ', 'Marv, ']
 
-    async def send_message(self, channel, message):
+    async def send_message(self, channel, *args, **kwargs):
         if isinstance(channel, str):
             channel = discord.utils.get(next(iter(self.servers)).channels, name=channel)
-        return await super().send_message(channel, message)
+        return await super().send_message(channel, *args, **kwargs)
 
     async def process_commands(self, message):
         for cmdName in self.disabled:

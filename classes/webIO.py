@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 from io import BytesIO
-from html2text import html2text
+from bs4 import BeautifulSoup
 
 def __init__():
     global session
@@ -16,46 +16,40 @@ async def xkcdLinks(message):
     params = {'q': message}
     response = await session.get(url='http://apps.reddolution.com/RelevantXKCD/', params=params)
     html = await response.text()
+    soup = BeautifulSoup(html, 'html.parser')
 
     relevants = []
-    toFind = 'http://xkcd.com/'
 
-    fromIndex = html.find(toFind) + len(toFind)
-    for i in range(0, 5):
-        start = html.find(toFind, fromIndex)
-        end = html.find('"', start)
-        relevants.append(html[start:end])
-        fromIndex = end
+    for i in range (1, 6):
+        div = soup.find('div', id='best' + str(i))
+        link = div.h3.a
+        relevants.append(link['href'])
 
     return relevants
 
 async def xkcdContent(url):
     response = await session.get(url=url)
     html = await response.text()
+    soup = BeautifulSoup(html, 'html.parser')
+    content = soup.find('div', id='middleContainer')
 
     async def getTitle():
-        start = html.find('ctitle') + len('ctitle') + 2
-        end = html.find('<', start)
-        return html2text(html[start:end])[:-2]
+        return soup.find(id='ctitle').string
 
     async def getNumber():
         toFind = 'Permanent link to this comic: https://xkcd.com/'
-        start = html.find(toFind) + len(toFind)
-        end = html.find('/', start)
-        return html[start:end]
+        tag = str(content)
+        start = tag.find(toFind) + len(toFind)
+        end = tag.find('/', start)
+        return tag[start:end]
 
     async def getImage():
-        start = html.find('imgs.xkcd.com')
-        end = html.find('"', start)
+        link = content.find('div', id='comic').img['src']
         
-        imgResp = await session.get(url='http://' + html[start:end])
-        my_bytes = await imgResp.read()
-        return BytesIO(my_bytes)
+        return 'http://' + link[2:]
 
     async def getHover():
-        start = html.find('"', html.find('imgs.xkcd.com')) + 9
-        end = html.find('"', start)
-        return html2text(html[start:end])[:-2]
+        return content.find('div', id='comic').img['title']
 
     title = await getTitle()
     number = await getNumber()

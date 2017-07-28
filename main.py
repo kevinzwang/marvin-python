@@ -157,70 +157,57 @@ async def available(ctx, message: str):
 async def avail(ctx, message: str):
     await ctx.invoke(available, message)
 
+async def xkcdEmbed (ctx, link):
+    content = await webIO.xkcdContent(link)
+    title = content[0] + ' (' + content[1] + ')'
+    em = discord.Embed(title=title, description=content[3], color=fileIO.get('config', 'colors', 'xkcd'), url=link)
+    em.set_image(url=content[2])
+    return em
+
 @bot.command(pass_context=True)
 async def xkcd(ctx, *, message:str=None):
     try:
         if message == 'latest' or message == None:
-            content = await webIO.xkcdContent('https://xkcd.com/')
-
-            top = content[0].upper() + ' (' + content[1] + ')'
-            bottom = '*' + content[3] + '*'
-
-            await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-            await bot.say(bottom)
-
+            em = await xkcdEmbed(ctx, 'https://xkcd.com/')
+            await bot.say(embed=em)
         elif message == 'random':
-            content = await webIO.xkcdContent('https://c.xkcd.com/random/comic/')
-
-            top = content[0].upper() + ' (' + content[1] + ')'
-            bottom = '*' + content[3] + '*'
-
-            await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-            await bot.say(bottom)
-
+            em = await xkcdEmbed(ctx, 'https://c.xkcd.com/random/comic/')
+            await bot.say(embed=em)
         else:
             links = await webIO.xkcdLinks(message)
             currentComic = 0
 
             correct = False
-            
-            response = None
+            em = await xkcdEmbed(ctx, links[currentComic])
+            response = await bot.say(embed=em)
 
             while not correct:
-                content = await webIO.xkcdContent(links[currentComic])
+                await bot.add_reaction(response, '✅')
+                await bot.add_reaction(response, '⛔')
 
-                top = content[0].upper() + ' (' + content[1] + ')'
-                bottom = '*' + content[3] + '*'
+                currentComic += 1
 
-                r1 = await bot.send_file(ctx.message.channel, content[2], filename='xkcd.png', content=top)
-                r2 = await bot.say(bottom)
-                
-                await bot.add_reaction(r2, '✅')
-                await bot.add_reaction(r2, '⛔')
-
-                reaction = await bot.wait_for_reaction(emoji=['✅', '⛔'], message=r2, timeout=30, user=ctx.message.author)
+                reaction = await bot.wait_for_reaction(emoji=['✅', '⛔'], message=response, timeout=30, user=ctx.message.author)
 
                 if reaction == None:
-                    await bot.remove_reaction(r2, '✅', bot.user)
-                    await bot.remove_reaction(r2, '⛔', bot.user)
+                    await bot.remove_reaction(response, '✅', bot.user)
+                    await bot.remove_reaction(response, '⛔', bot.user)
                     correct = True
                 elif str(reaction.reaction.emoji) == '✅':
-                    await bot.remove_reaction(r2, '✅', bot.user)
-                    await bot.remove_reaction(r2, '⛔', bot.user)
-                    await bot.remove_reaction(r2, '✅', ctx.message.author)
+                    await bot.remove_reaction(response, '✅', bot.user)
+                    await bot.remove_reaction(response, '⛔', bot.user)
+                    await bot.remove_reaction(response, '✅', ctx.message.author)
                     correct = True
                 elif str(reaction.reaction.emoji) == '⛔':
-                    if currentComic < 4:
-                        await bot.delete_message(r1)
-                        await bot.delete_message(r2)
+                    if currentComic < 5:
+                        em = await xkcdEmbed(ctx, links[currentComic])
+                        await bot.delete_message(response)
+                        response = await bot.send_message(ctx.message.channel, embed=em)
                     else:
-                        await bot.delete_message(r1)
-                        await bot.delete_message(r2)
-                        await bot.say('Welp, that\'s all. Better luck next time.')
-                        correct = True
-
-                    currentComic += 1
-    except Exception:
+                        await bot.delete_message(response)
+                        await bot.send_message('Welp, that\'s all. Better luck next time.')
+                        correct = True            
+    except Exception as e:
         await bot.say('Whoops, something went wrong while trying to get your xkcd. Try again later.')
 
 # TORD
