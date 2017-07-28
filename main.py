@@ -43,6 +43,7 @@ async def on_message(message):
     lower = message.content.lower()
 
     # jopt out
+    global prevAuthor
     if str(message.author) == 'JonnyBot#9936' and prevAuthor in fileIO.get('config', 'jopt-out'):
         bot.delete_message(message)
 
