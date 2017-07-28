@@ -44,13 +44,13 @@ async def on_message(message):
 
     # jopt out
     global prevAuthor
-    if str(message.author) == 'JonnyBot#9936' and prevAuthor in fileIO.get('config', 'jopt-out'):
+    if str(message.author) == 'JonnyBot#9936' and not message.content.startswith('~') and prevAuthor in fileIO.get('config', 'jopt-out'):
         await bot.delete_message(message)
 
     prevAuthor = str(message.author)
 
     # change nickname when people say "I'm ___"
-    if str(message.author) not in fileIO.get('config', 'opt-out') and not message.content.startswith('~') and not message.author.bot:
+    if str(message.author) not in fileIO.get('config', 'opt-out') and not message.author.bot:
         for im in ['im ', 'i\'m ', 'i am ']:
             index = lower.find(im)
             if index != -1 and (index == 0 or lower[index - 1] == ' '):
