@@ -17,6 +17,7 @@ bot = marvin.Bot()
 loop = asyncio.get_event_loop()
 availables = {}
 nicknames = {}
+prevAuthor = None
 
 async def _not_admin(ctx):
     await bot.send_message(ctx.message.channel, fileIO.get('messages', 'not-admin').format(ctx.message.author.mention))
@@ -40,6 +41,12 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     lower = message.content.lower()
+
+    # jopt out
+    if str(message.author) == 'JonnyBot#9936' and prevAuthor in fileIO.get('config', 'jopt-out'):
+        bot.delete_message(message)
+
+    prevAuthor = message.author
 
     # change nickname when people say "I'm ___"
     if str(message.author) not in fileIO.get('config', 'opt-out') and not message.author.bot:
@@ -94,6 +101,18 @@ async def on_reaction_remove(reaction, user):
         await bot.unpin_message(reaction.message)
 
 # COMMANDS 
+
+@bot.command(pass_context=True)
+async def jopt(ctx, message: str):
+    if message == 'in':
+        fileIO.remove('config', 'jopt-out',  str(ctx.message.author))
+        await bot.reply(fileIO.get('messages', 'jopt-in'))
+    elif message == 'out':
+        fileIO.add('config', 'jopt-out',  str(ctx.message.author))
+        await bot.reply(fileIO.get('messages', 'jopt-out'))
+    else:
+        await _incorrect_usage(ctx)
+
 
 @bot.command()
 async def lmgtfy(*, message: str):

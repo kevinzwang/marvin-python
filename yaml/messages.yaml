@@ -13,3 +13,5 @@ opt-out: opted out successfully. If you would like to rejoin the fun, just do '{
 ping-pong: 'Pong!
 
   That took {} milliseconds.'
+jopt-out: jopted out successfully!
+jopt-in: jopted in succesfully.
