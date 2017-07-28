@@ -47,7 +47,7 @@ async def on_message(message):
     if str(message.author) == 'JonnyBot#9936' and prevAuthor in fileIO.get('config', 'jopt-out'):
         await bot.delete_message(message)
 
-    prevAuthor = message.author
+    prevAuthor = str(message.author)
 
     # change nickname when people say "I'm ___"
     if str(message.author) not in fileIO.get('config', 'opt-out') and not message.author.bot:
@@ -113,7 +113,6 @@ async def jopt(ctx, message: str):
         await bot.reply(fileIO.get('messages', 'jopt-out'))
     else:
         await _incorrect_usage(ctx)
-
 
 @bot.command()
 async def lmgtfy(*, message: str):
