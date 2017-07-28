@@ -45,7 +45,7 @@ async def on_message(message):
     # jopt out
     global prevAuthor
     if str(message.author) == 'JonnyBot#9936' and prevAuthor in fileIO.get('config', 'jopt-out'):
-        bot.delete_message(message)
+        await bot.delete_message(message)
 
     prevAuthor = message.author
 
@@ -140,7 +140,7 @@ async def opt(ctx, message: str):
 async def available(ctx, message: str):
     if message == 'list':
         if len(availables) > 0:
-            await bot.reply('people currently available:')
+            await bot.say('people currently available:')
             for member in availables:
                 nick = member.nick
                 if nick == None:
