@@ -154,24 +154,27 @@ async def available(ctx, message: str):
         del availables[ctx.message.author]
         await bot.reply('success!')
     elif message.isdigit():
-        if ctx.message.author in availables:
-            availables[ctx.message.author] += 1
+        if int(message) > 720:
+            await bot.reply('fuck you, that\'s way too long!')
         else:
-            availables[ctx.message.author] = 1
+            if ctx.message.author in availables:
+                availables[ctx.message.author] += 1
+            else:
+                availables[ctx.message.author] = 1
 
-        mentions = ''
-        if len(availables) >= 4:
-            for member in availables:
-                mentions += member.mention + ' '
-            await bot.send_message('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
-        else:
-            await bot.reply('availability recorded successfully!')
+            mentions = ''
+            if len(availables) >= 4:
+                for member in availables:
+                    mentions += member.mention + ' '
+                await bot.send_message('game-night', '{}, there\'s enough people for @game-night!'.format(mentions))
+            else:
+                await bot.reply('availability recorded successfully!')
 
-        await asyncio.sleep(int(message)*60)
-        if ctx.message.author in availables.keys():
-            availables[ctx.message.author] -= 1
-            if availables[ctx.message.author] == 0:
-                del availables[ctx.message.author]
+            await asyncio.sleep(int(message)*60)
+            if ctx.message.author in availables.keys():
+                availables[ctx.message.author] -= 1
+                if availables[ctx.message.author] == 0:
+                    del availables[ctx.message.author]
     else:
         await _incorrect_usage(ctx)
 
