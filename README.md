@@ -23,7 +23,7 @@ Finally, celebrate! 🎉
 
 ## Versions
 
-## 1.0.2
+### 1.0.2
 * *disable/enable* - admin commands to disable and enable commands
 
 ### 1.0.1
