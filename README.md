@@ -1,3 +1,6 @@
+# NOTICE
+I WILL NO LONGER BE MAINTAINING THIS PROJECT. INSTEAD, I AM CONTINUING DEVELOPMENT IN JAVASCRIPT. CHECK IT OUT HERE: (https://github.com/kevinzwang/marvin-js)
+
 # Marvin
 A bot to manage the Discord Chaos server.
 
